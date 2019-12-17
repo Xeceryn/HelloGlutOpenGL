@@ -1,15 +1,10 @@
 /*
- * GLUT Shapes Demo
+ * GLUT HomeWork Animation 2D
  *
- * Written by Nigel Stewart November 2003
+ * Written by Adhitya Musthofa December 2019
  *
- * This program is test harness for the sphere, cone
- * and torus shapes in GLUT.
+ * This program is test animation 2D in GLUT.
  *
- * Spinning wireframe and smooth shaded shapes are
- * displayed until the ESC or q key is pressed.  The
- * number of geometry stacks and slices can be adjusted
- * using the + and - keys.
  */
 
 #include <windows.h>
@@ -20,159 +15,172 @@
 #endif
 
 #include <stdlib.h>
+#include <math.h>
 
-static int slices = 16;
-static int stacks = 16;
+typedef struct {
+    float x;
+    float y;
+} point2D_t;
 
-/* GLUT callback Handlers */
+typedef struct {
+    float r;
+    float g;
+    float b;
+} color_t;
 
-static void resize(int width, int height)
-{
-    const float ar = (float) width / (float) height;
-
-    glViewport(0, 0, width, height);
-    glMatrixMode(GL_PROJECTION);
-    glLoadIdentity();
-    glFrustum(-ar, ar, -1.0, 1.0, 2.0, 100.0);
-
-    glMatrixMode(GL_MODELVIEW);
-    glLoadIdentity() ;
+void setColor(color_t col){
+    glColor3f(col.r, col.g, col.b);
 }
 
-static void display(void)
-{
-    const double t = glutGet(GLUT_ELAPSED_TIME) / 1000.0;
-    const double a = t*90.0;
+int increment = 0;
 
-    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-    glColor3d(1,0,0);
+point2D_t matahari[360];
+point2D_t lintasanBumi[360];
+point2D_t bumi[360];
+point2D_t lintasanBulan[360];
+point2D_t pusatBumi[1];
+point2D_t titikBumi[360];
+point2D_t titikBulan[360];
+point2D_t bulan[360];
 
-    glPushMatrix();
-        glTranslated(-2.4,1.2,-6);
-        glRotated(60,1,0,0);
-        glRotated(a,0,0,1);
-        glutSolidSphere(1,slices,stacks);
-    glPopMatrix();
+void drawLineLoop(point2D_t pnt[], int n){
+    int i;
+    glBegin(GL_LINE_LOOP);
+    for (i=0;i<n;i++) {
+        glVertex2f(pnt[i].x, pnt[i].y);
+    }
+    glEnd();
+}
 
-    glPushMatrix();
-        glTranslated(0,1.2,-6);
-        glRotated(60,1,0,0);
-        glRotated(a,0,0,1);
-        glutSolidCone(1,1,slices,stacks);
-    glPopMatrix();
+void drawPolygon(point2D_t pnt[], int n){
+    int i;
+    glBegin(GL_POLYGON);
+    for (i=0;i<n;i++) {
+        glVertex2f(pnt[i].x, pnt[i].y);
+    }
+    glEnd();
+}
 
-    glPushMatrix();
-        glTranslated(2.4,1.2,-6);
-        glRotated(60,1,0,0);
-        glRotated(a,0,0,1);
-        glutSolidTorus(0.2,0.8,slices,stacks);
-    glPopMatrix();
+void drawLintasan(point2D_t pnt[], int R1, color_t color){
+    setColor(color);
+    for(int i=0; i<360; i++){
+        pnt[i].x= (float) (R1 * cos(i*3.14/180) );
+        pnt[i].y= (float) (R1 * sin(i*3.14/180) );
+        drawLineLoop(pnt, 360);
+    }
+}
 
-    glPushMatrix();
-        glTranslated(-2.4,-1.2,-6);
-        glRotated(60,1,0,0);
-        glRotated(a,0,0,1);
-        glutWireSphere(1,slices,stacks);
-    glPopMatrix();
+void drawLintasanBumi(){
+    int R1 = 175;
+    color_t color = {1.0,1.0,1.0};
+    drawLintasan(lintasanBumi, R1, color);
+}
 
-    glPushMatrix();
-        glTranslated(0,-1.2,-6);
-        glRotated(60,1,0,0);
-        glRotated(a,0,0,1);
-        glutWireCone(1,1,slices,stacks);
-    glPopMatrix();
+void drawSegitiga(point2D_t pnt[], int n, color_t color){
+    setColor(color);
+    drawPolygon(pnt, n);
+}
 
-    glPushMatrix();
-        glTranslated(2.4,-1.2,-6);
-        glRotated(60,1,0,0);
-        glRotated(a,0,0,1);
-        glutWireTorus(0.2,0.8,slices,stacks);
-    glPopMatrix();
+void drawCircle(point2D_t pnt[], int R1, color_t color){
+    setColor(color);
+    for(int i=0; i<360; i++){
+        pnt[i].x= (float) (R1 * cos(i*3.14/180) );
+        pnt[i].y= (float) (R1 * sin(i*3.14/180) );
+    }
+    drawPolygon(pnt, 360);
+}
 
+void drawMatahari(){
+    int R1 = 50;
+    color_t color = {0.0,1.0,0.0};
+    drawCircle(matahari, R1, color);
+    point2D_t segitiga1[3] = {{-15.0,55.0},{15.0,55.0},{0.0,90.0}};
+    drawSegitiga(segitiga1, 3, color);
+    point2D_t segitiga2[3] = {{55,15.0},{55.0,-15.0},{90.0,0.0}};
+    drawSegitiga(segitiga2, 3, color);
+    point2D_t segitiga3[3] = {{15.0,-55.0},{-15.0,-55.0},{0.0,-90.0}};
+    drawSegitiga(segitiga3, 3, color);
+    point2D_t segitiga4[3] = {{-55,-15.0},{-55.0,15.0},{-90.0,0.0}};
+    drawSegitiga(segitiga4, 3, color);
+    point2D_t segitiga5[3] = {{30.0,50.0},{65.0,65.0},{50.0,30.0}};
+    drawSegitiga(segitiga5, 3, color);
+    point2D_t segitiga6[3] = {{30.0,-50.0},{65.0,-65.0},{50.0,-30.0}};
+    drawSegitiga(segitiga6, 3, color);
+    point2D_t segitiga7[3] = {{-30.0,-50.0},{-65.0,-65.0},{-50.0,-30.0}};
+    drawSegitiga(segitiga7, 3, color);
+    point2D_t segitiga8[3] = {{-30.0,50.0},{-65.0,65.0},{-50.0,30.0}};
+    drawSegitiga(segitiga8, 3, color);
+}
+
+int increment2 = 0;
+
+void drawBumi(){
+    titikBumi[increment].x = (float) (175 * cos(increment*3.14/180) );
+    titikBumi[increment].y = (float) (175 * sin(increment*3.14/180) );
+    color_t color = {1.0,0.0,1.0};
+    setColor(color);
+    int R = 30;
+    for ( int i=0; i<360; i++){
+         bumi[i].x=titikBumi[increment].x + (float) (R * cos(i*3.14/180) );
+         bumi[i].y=titikBumi[increment].y + (float) (R * sin(i*3.14/180) );
+    }
+    drawPolygon(bumi, 360);
+    color_t colorLintasanBulan = {1.0,1.0,1.0};
+    setColor(colorLintasanBulan);
+    for ( int i=0; i<360; i++){
+         lintasanBulan[i].x=titikBumi[increment].x + (float) (50 * cos(i*3.14/180) );
+         lintasanBulan[i].y=titikBumi[increment].y + (float) (50 * sin(i*3.14/180) );
+    }
+    drawLineLoop(lintasanBulan, 360);
+    titikBulan[increment].x =lintasanBulan[increment2].x + (float) (cos(increment*3.14/180) );
+    titikBulan[increment].y =lintasanBulan[increment2].y + (float) (sin(increment*3.14/180) );
+    color_t colorBulan = {0.75,0.75,0.75};
+    setColor(colorBulan);
+    for ( int i=0; i<360; i++){
+         bulan[i].x=titikBulan[increment].x + (float) (10 * cos(i*3.14/180) );
+         bulan[i].y=titikBulan[increment].y + (float) (10 * sin(i*3.14/180) );
+    }
+    drawPolygon(bulan, 360);
+    if(increment == 360){
+        increment = 0;
+    }else{
+        increment++;
+    }
+    if(increment2 == 360){
+        increment2 = 0;
+    }else{
+        increment2+=2;
+    }
+}
+
+void userdraw() {
+    glClearColor(0.0, 0.0, 0.0, 0.0);
+    drawMatahari();
+    drawLintasanBumi();
+    drawBumi();
+}
+
+void timer(int value){
+    glutPostRedisplay();
+    glutTimerFunc(50, timer, 0);
+}
+
+void display() {
+    glClear(GL_COLOR_BUFFER_BIT);
+    userdraw();
     glutSwapBuffers();
 }
 
-
-static void key(unsigned char key, int x, int y)
-{
-    switch (key)
-    {
-        case 27 :
-        case 'q':
-            exit(0);
-            break;
-
-        case '+':
-            slices++;
-            stacks++;
-            break;
-
-        case '-':
-            if (slices>3 && stacks>3)
-            {
-                slices--;
-                stacks--;
-            }
-            break;
-    }
-
-    glutPostRedisplay();
-}
-
-static void idle(void)
-{
-    glutPostRedisplay();
-}
-
-const GLfloat light_ambient[]  = { 0.0f, 0.0f, 0.0f, 1.0f };
-const GLfloat light_diffuse[]  = { 1.0f, 1.0f, 1.0f, 1.0f };
-const GLfloat light_specular[] = { 1.0f, 1.0f, 1.0f, 1.0f };
-const GLfloat light_position[] = { 2.0f, 5.0f, 5.0f, 0.0f };
-
-const GLfloat mat_ambient[]    = { 0.7f, 0.7f, 0.7f, 1.0f };
-const GLfloat mat_diffuse[]    = { 0.8f, 0.8f, 0.8f, 1.0f };
-const GLfloat mat_specular[]   = { 1.0f, 1.0f, 1.0f, 1.0f };
-const GLfloat high_shininess[] = { 100.0f };
-
-/* Program entry point */
-
-int main(int argc, char *argv[])
-{
-    glutInit(&argc, argv);
-    glutInitWindowSize(640,480);
-    glutInitWindowPosition(10,10);
-    glutInitDisplayMode(GLUT_RGB | GLUT_DOUBLE | GLUT_DEPTH);
-
-    glutCreateWindow("GLUT Shapes");
-
-    glutReshapeFunc(resize);
-    glutDisplayFunc(display);
-    glutKeyboardFunc(key);
-    glutIdleFunc(idle);
-
-    glClearColor(1,1,1,1);
-    glEnable(GL_CULL_FACE);
-    glCullFace(GL_BACK);
-
-    glEnable(GL_DEPTH_TEST);
-    glDepthFunc(GL_LESS);
-
-    glEnable(GL_LIGHT0);
-    glEnable(GL_NORMALIZE);
-    glEnable(GL_COLOR_MATERIAL);
-    glEnable(GL_LIGHTING);
-
-    glLightfv(GL_LIGHT0, GL_AMBIENT,  light_ambient);
-    glLightfv(GL_LIGHT0, GL_DIFFUSE,  light_diffuse);
-    glLightfv(GL_LIGHT0, GL_SPECULAR, light_specular);
-    glLightfv(GL_LIGHT0, GL_POSITION, light_position);
-
-    glMaterialfv(GL_FRONT, GL_AMBIENT,   mat_ambient);
-    glMaterialfv(GL_FRONT, GL_DIFFUSE,   mat_diffuse);
-    glMaterialfv(GL_FRONT, GL_SPECULAR,  mat_specular);
-    glMaterialfv(GL_FRONT, GL_SHININESS, high_shininess);
-
-    glutMainLoop();
-
-    return EXIT_SUCCESS;
+int main(int argc, char **argv){
+	glutInit(&argc,argv);
+	glutInitDisplayMode ( GLUT_DOUBLE | GLUT_RGB );
+	glutInitWindowPosition(100,100);
+	glutInitWindowSize(640,480);
+	glutCreateWindow ("Adhitya Musthofa 2103187091");
+	glClearColor(1.0, 1.0, 1.0, 0.0);
+	gluOrtho2D(-320., 320., -240.0, 240.0);
+	glutDisplayFunc(display);
+	glutTimerFunc(1,timer,0);
+	glutMainLoop();
+	return 0;
 }
