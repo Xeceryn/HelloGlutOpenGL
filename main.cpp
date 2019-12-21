@@ -1,15 +1,9 @@
 /*
  * GLUT Shapes Demo
  *
- * Written by Nigel Stewart November 2003
+ * Written by Adhitya Musthofa December 2019
  *
- * This program is test harness for the sphere, cone
- * and torus shapes in GLUT.
- *
- * Spinning wireframe and smooth shaded shapes are
- * displayed until the ESC or q key is pressed.  The
- * number of geometry stacks and slices can be adjusted
- * using the + and - keys.
+ * This program is test Tabung.
  */
 
 #include <windows.h>
@@ -19,160 +13,228 @@
 #include <GL/glut.h>
 #endif
 
+#include <stdio.h>
 #include <stdlib.h>
+#include <math.h>
 
-static int slices = 16;
-static int stacks = 16;
+static GLint fogMode;
 
-/* GLUT callback Handlers */
+/*  inisialisasi kedalaman buffer, fog, sumber cahaya, sifat-sifat bahan dan model pencahayaan */
 
-static void resize(int width, int height)
+static void init(void)
 {
-    const float ar = (float) width / (float) height;
 
-    glViewport(0, 0, width, height);
-    glMatrixMode(GL_PROJECTION);
-    glLoadIdentity();
-    glFrustum(-ar, ar, -1.0, 1.0, 2.0, 100.0);
 
-    glMatrixMode(GL_MODELVIEW);
-    glLoadIdentity() ;
+   glEnable(GL_FOG);
+   {
+      GLfloat fogColor[4] = {0.5, 0.5, 0.5, 1.0};
+
+      fogMode = GL_EXP;
+      glFogi (GL_FOG_MODE, fogMode);
+      glFogfv (GL_FOG_COLOR, fogColor);
+      glFogf (GL_FOG_DENSITY, 0.40);
+      glHint (GL_FOG_HINT, GL_DONT_CARE);
+      glFogf (GL_FOG_START, 1.0);
+      glFogf (GL_FOG_END, 5.0);
+   }
+   glClearColor(1.0, 1.0, 1.0, 1.0);  /* memberi warna kabut */
 }
 
-static void display(void)
+double rx = 1.0;
+double ry = 1.0;
+GLUquadricObj *qobj;
+
+float l[] = { 45.0,  45.0, 45.0 }; // koordinat sumber cahaya
+float n[] = { 0.0,  -1.0, 0.0 }; //menentukan vektor normal bidang
+float e[] = { 50.0, -50.0, 50.0 }; //menentukan titik bidang
+
+void help();
+
+// obyek yang akan digambar
+void draw()
 {
-    const double t = glutGet(GLUT_ELAPSED_TIME) / 1000.0;
-    const double a = t*90.0;
+    qobj = gluNewQuadric();
+    gluQuadricDrawStyle(qobj, GLU_FILL);
 
-    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-    glColor3d(1,0,0);
+    gluCylinder(qobj, 15, 15, 50, 45, 50);
+}
 
-    glPushMatrix();
-        glTranslated(-2.4,1.2,-6);
-        glRotated(60,1,0,0);
-        glRotated(a,0,0,1);
-        glutSolidSphere(1,slices,stacks);
-    glPopMatrix();
+//membuat proyeksi bayangan
+void glShadowProjection(float * l, float * e, float * n)
+{
+  float d, c;
+  float mat[16];
 
-    glPushMatrix();
-        glTranslated(0,1.2,-6);
-        glRotated(60,1,0,0);
-        glRotated(a,0,0,1);
-        glutSolidCone(1,1,slices,stacks);
-    glPopMatrix();
+  d = n[0]*l[0] + n[1]*l[1] + n[2]*l[2];
+  c = e[0]*n[0] + e[1]*n[1] + e[2]*n[2] - d;
 
-    glPushMatrix();
-        glTranslated(2.4,1.2,-6);
-        glRotated(60,1,0,0);
-        glRotated(a,0,0,1);
-        glutSolidTorus(0.2,0.8,slices,stacks);
-    glPopMatrix();
+  mat[0]  = l[0]*n[0]+c;            // membuat matrik. OpenGL menggunakan kolom matrik
+  mat[4]  = n[1]*l[0];
+  mat[8]  = n[2]*l[0];
+  mat[12] = -l[0]*c-l[0]*d;
 
-    glPushMatrix();
-        glTranslated(-2.4,-1.2,-6);
-        glRotated(60,1,0,0);
-        glRotated(a,0,0,1);
-        glutWireSphere(1,slices,stacks);
-    glPopMatrix();
+  mat[1]  = n[0]*l[1];
+  mat[5]  = l[1]*n[1]+c;
+  mat[9]  = n[2]*l[1];
+  mat[13] = -l[1]*c-l[1]*d;
 
-    glPushMatrix();
-        glTranslated(0,-1.2,-6);
-        glRotated(60,1,0,0);
-        glRotated(a,0,0,1);
-        glutWireCone(1,1,slices,stacks);
-    glPopMatrix();
+  mat[2]  = n[0]*l[2];
+  mat[6]  = n[1]*l[2];
+  mat[10] = l[2]*n[2]+c;
+  mat[14] = -l[2]*c-l[2]*d;
 
-    glPushMatrix();
-        glTranslated(2.4,-1.2,-6);
-        glRotated(60,1,0,0);
-        glRotated(a,0,0,1);
-        glutWireTorus(0.2,0.8,slices,stacks);
-    glPopMatrix();
+  mat[3]  = n[0];
+  mat[7]  = n[1];
+  mat[11] = n[2];
+  mat[15] = -d;
 
-    glutSwapBuffers();
+  glMultMatrixf(mat);              // kalikan matrik
+}
+
+void render()
+{
+  glClearColor(0.5, 0.5, 1.0, 1.0); //warna background atas;
+  glClear(GL_COLOR_BUFFER_BIT|GL_DEPTH_BUFFER_BIT);
+
+  glLightfv(GL_LIGHT0, GL_POSITION, l);
+
+  glDisable(GL_CULL_FACE);
+  glDisable(GL_LIGHTING);
+
+  //glColor3f(1.0,1.0,1.0);
+  glBegin(GL_POINTS);
+  glVertex3f(l[0],l[1],l[2]);
+  glEnd();
+
+  glColor3f(0.5, 1.0, 0.5); //mengatur warna background bawah;
+  glBegin(GL_QUADS);
+  glNormal3f(0.0,1.0,0.0);
+
+  glVertex3f(-1300.0,e[1]-0.1, 1300.0);
+  glVertex3f( 1300.0,e[1]-0.1, 1300.0);
+  glVertex3f( 1300.0,e[1]-0.1,-1300.0);
+  glVertex3f(-1300.0,e[1]-0.1,-1300.0);
+
+  glEnd();
+
+  // gambar bayangan
+  glPushMatrix();
+  glTranslatef(1.0, 0.0, 1.0);
+  glRotatef(45, 45, 0, 0);
+  glRotatef(45, 45, 0, 0);
+  glEnable(GL_LIGHTING);
+  glColor3f(1.0,0.0,0.0); //warna tabung
+  draw();
+  glPopMatrix();
+
+  //sekarang  gambar bayangan yang muncul
+  glPushMatrix();
+  glShadowProjection(l,e,n);
+
+  glRotatef(45, 45, 0, 0);
+  glRotatef(45, 45, 0, 0);
+  glDisable(GL_LIGHTING);
+  glColor3f(0.2,0.2,0.2); //mengatur warna bayangan
+  draw();
+  glPopMatrix();
+
+  glutSwapBuffers();
 }
 
 
-static void key(unsigned char key, int x, int y)
+void keyboard(unsigned char key, int x, int y)
 {
-    switch (key)
-    {
-        case 27 :
-        case 'q':
-            exit(0);
-            break;
-
-        case '+':
-            slices++;
-            stacks++;
-            break;
-
-        case '-':
-            if (slices>3 && stacks>3)
-            {
-                slices--;
-                stacks--;
-            }
-            break;
-    }
-
-    glutPostRedisplay();
+   switch (key) {
+      case 'f':
+      case 'F':
+         if (fogMode == GL_EXP) {
+        fogMode = GL_EXP2;
+        printf ("Kabut dalam mode GL_EXP2\n");
+         }
+         else if (fogMode == GL_EXP2) {
+            fogMode = GL_LINEAR;
+            printf ("Kabut dalam mode GL_LINEAR\n");
+         }
+         else if (fogMode == GL_LINEAR) {
+            fogMode = GL_EXP;
+            printf ("Kabut dalam mode GL_EXP\n");
+         }
+         glFogi (GL_FOG_MODE, fogMode);
+         glutPostRedisplay();
+         break;
+      case 27:
+         exit(0);
+         break;
+      default:
+         break;
+   }
 }
 
-static void idle(void)
+/*void keypress(unsigned char c, int a, int b)
 {
-    glutPostRedisplay();
+  if ( c==27 ) exit(0);
+  else if ( c=='s' ) l[1]-=5.0;
+  else if ( c=='w' ) l[1]+=5.0;
+  else if ( c=='a' ) l[0]-=5.0;
+  else if ( c=='d' ) l[0]+=5.0;
+  else if ( c=='q' ) l[2]-=5.0;
+  else if ( c=='e' ) l[2]+=5.0;
+  else if ( c=='?' ) help();
+}
+*/
+void help()
+{
+  printf("==================================================    \n");
+  printf("proyeksi contoh bayangan sebuah obyek tabung            \n");
+  printf("----------------------------------------------------------------        \n");
+  printf("s/w        memindahkan sumber cahaya naik/turun        \n");
+  printf("a/d     memindahkan sumber cahaya kekanan/kekiri        \n");
+  printf("q/e        memindahkan sumber cahaya kedepan atau kebelakang\n");
+  printf("?              ini adalah contoh\n");
+  printf("==================================================    \n");
 }
 
-const GLfloat light_ambient[]  = { 0.0f, 0.0f, 0.0f, 1.0f };
-const GLfloat light_diffuse[]  = { 1.0f, 1.0f, 1.0f, 1.0f };
-const GLfloat light_specular[] = { 1.0f, 1.0f, 1.0f, 1.0f };
-const GLfloat light_position[] = { 2.0f, 5.0f, 5.0f, 0.0f };
-
-const GLfloat mat_ambient[]    = { 0.7f, 0.7f, 0.7f, 1.0f };
-const GLfloat mat_diffuse[]    = { 0.8f, 0.8f, 0.8f, 1.0f };
-const GLfloat mat_specular[]   = { 1.0f, 1.0f, 1.0f, 1.0f };
-const GLfloat high_shininess[] = { 100.0f };
-
-/* Program entry point */
-
-int main(int argc, char *argv[])
+void idle()
 {
-    glutInit(&argc, argv);
-    glutInitWindowSize(640,480);
-    glutInitWindowPosition(10,10);
-    glutInitDisplayMode(GLUT_RGB | GLUT_DOUBLE | GLUT_DEPTH);
+  rx+=0.5;
+  ry+=0.5;
+  render();
+}
 
-    glutCreateWindow("GLUT Shapes");
+void resize(int w, int h)
+{
+  glViewport(0, 0, w, h);
+}
 
-    glutReshapeFunc(resize);
-    glutDisplayFunc(display);
-    glutKeyboardFunc(key);
-    glutIdleFunc(idle);
+int main(int argc, char * argv[])
+{
+  glutInit(&argc, argv);
+  glutInitDisplayMode(GLUT_DOUBLE | GLUT_RGB | GLUT_DEPTH);
+  glutCreateWindow("Adhitya Musthofa 2103187091");
+  glutReshapeFunc(resize);
+  glutReshapeWindow(620,480);
+  //glutKeyboardFunc(keypress);
+  glutDisplayFunc(render);
+  glutIdleFunc(idle);
+  glutKeyboardFunc (keyboard);
 
-    glClearColor(1,1,1,1);
-    glEnable(GL_CULL_FACE);
-    glCullFace(GL_BACK);
 
-    glEnable(GL_DEPTH_TEST);
-    glDepthFunc(GL_LESS);
+  glEnable(GL_NORMALIZE);
+  glEnable(GL_LIGHTING);
+  glEnable(GL_COLOR_MATERIAL);
+  glEnable(GL_DEPTH_TEST);
+  glEnable(GL_LIGHT0);
+  glEnable(GL_TEXTURE_2D);
+  glMatrixMode(GL_PROJECTION);
 
-    glEnable(GL_LIGHT0);
-    glEnable(GL_NORMALIZE);
-    glEnable(GL_COLOR_MATERIAL);
-    glEnable(GL_LIGHTING);
+  glLoadIdentity();
+  gluPerspective(60.0f, 1.0, 2.0, 500.0);
 
-    glLightfv(GL_LIGHT0, GL_AMBIENT,  light_ambient);
-    glLightfv(GL_LIGHT0, GL_DIFFUSE,  light_diffuse);
-    glLightfv(GL_LIGHT0, GL_SPECULAR, light_specular);
-    glLightfv(GL_LIGHT0, GL_POSITION, light_position);
+  // Reset koordinat  sebelum dimodifikasi/diubah
+  glMatrixMode(GL_MODELVIEW);
+  glLoadIdentity();
+  glTranslatef(1.0, 1.0, -150.0);
 
-    glMaterialfv(GL_FRONT, GL_AMBIENT,   mat_ambient);
-    glMaterialfv(GL_FRONT, GL_DIFFUSE,   mat_diffuse);
-    glMaterialfv(GL_FRONT, GL_SPECULAR,  mat_specular);
-    glMaterialfv(GL_FRONT, GL_SHININESS, high_shininess);
-
-    glutMainLoop();
-
-    return EXIT_SUCCESS;
+  glutMainLoop();
+  return 0;
 }
