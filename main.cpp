@@ -15,19 +15,100 @@
 
 #include <stdlib.h>
 
-void drawDot(int x, int y){
-    glBegin(GL_POINTS);
-    glVertex2i(x, y);
-    glEnd();
+void userDrawAbstract(){
+    glClear(GL_COLOR_BUFFER_BIT);
+
+        glColor3f(0.0, 0.0, 0.0);
+        glBegin(GL_POINTS);
+        glVertex3f(0.5, 0.5, 0.0);
+        glVertex3f(-0.5, 0.5, 0.0);
+        glVertex3f(-0.5, -0.5, 0.0);
+        glVertex3f(0.5, -0.5, 0.0);
+        glEnd();
+
+        glColor3f(0.0, 0.0, 0.0);
+        glBegin(GL_LINES);
+        glVertex3f(0.0, 1.0, 0.0);
+        glVertex3f(0.0, -1.0, 0.0);
+        glVertex3f(-1.0, 0.0, 0.0);
+        glVertex3f(1.0, 0.0, 0.0);
+        glEnd();
+
+        glColor3f(0.0, 0.0, 0.0);
+        glBegin(GL_LINE_STRIP);
+        glVertex3f(0.2, 0.2, 0.0);
+        glVertex3f(-0.2, 0.2, 0.0);
+        glVertex3f(-0.2, -0.2, 0.0);
+        glVertex3f(0.2, -0.2, 0.0);
+        glVertex3f(0.2, 0.2, 0.0);
+        glEnd();
+
+        glColor3f(0.0, 0.0, 0.0);
+        glBegin(GL_LINE_LOOP);
+        glVertex3f(0.4, 0.4, 0.0);
+        glVertex3f(-0.4, 0.4, 0.0);
+        glVertex3f(-0.4, -0.4, 0.0);
+        glVertex3f(0.4, -0.4, 0.0);
+        glEnd();
+
+        /* titik random */
+        glColor3f(1.0, 0.0, 0.0);
+        glPointSize(5);
+        glBegin(GL_POINTS);
+        for(int i=0; i<100; i++){
+            float a=(float)(rand()%100)/100;
+            float b=(float)(rand()%100)/100;
+            glVertex3f(a, b, 0.0);
+            glVertex3f(-a, b, 0.0);
+            glVertex3f(a, -b, 0.0);
+            glVertex3f(-a, -b, 0.0);
+        }
+        glEnd();
+
+        /* kotak mendatar */
+        glColor3f(0.0, 0.0, 0.0);
+        glBegin(GL_LINES);
+        glVertex3f(0.0, 1.0, 0.0);
+        glVertex3f(0.0, -1.0, 0.0);
+        glVertex3f(-0.2, 1.0, 0.0);
+        glVertex3f(-0.2, -1.0, 0.0);
+        glVertex3f(-0.4, 1.0, 0.0);
+        glVertex3f(-0.4, -1.0, 0.0);
+        glVertex3f(-0.6, 1.0, 0.0);
+        glVertex3f(-0.6, -1.0, 0.0);
+        glVertex3f(-0.8, 1.0, 0.0);
+        glVertex3f(-0.8, -1.0, 0.0);
+        glVertex3f(0.2, 1.0, 0.0);
+        glVertex3f(0.2, -1.0, 0.0);
+        glVertex3f(0.4, 1.0, 0.0);
+        glVertex3f(0.4, -1.0, 0.0);
+        glVertex3f(0.6, 1.0, 0.0);
+        glVertex3f(0.6, -1.0, 0.0);
+        glVertex3f(0.8, 1.0, 0.0);
+        glVertex3f(0.8, -1.0, 0.0);
+        glVertex3f(-1.0, 0.2, 0.0);
+        glVertex3f(1.0, 0.2, 0.0);
+        glVertex3f(-1.0, 0.4, 0.0);
+        glVertex3f(1.0, 0.4, 0.0);
+        glVertex3f(1.0, 0.6, 0.0);
+        glVertex3f(-1.0, 0.6, 0.0);
+        glVertex3f(-1.0, 0.8, 0.0);
+        glVertex3f(1.0, 0.8, 0.0);
+        glVertex3f(-1.0, -0.2, 0.0);
+        glVertex3f(1.0, -0.2, 0.0);
+        glVertex3f(-1.0, -0.4, 0.0);
+        glVertex3f(1.0, -0.4, 0.0);
+        glVertex3f(-1.0, -0.6, 0.0);
+        glVertex3f(1.0, -0.6, 0.0);
+        glVertex3f(-1.0, 0.8, 0.0);
+        glVertex3f(1.0, 0.8, 0.0);
+        glEnd();
+    glFlush();
 }
 
 void userDraw(void){
     /* for drawwing here :) */
-    glPointSize(5);
-    glColor3f(1, 0, 0);
-    drawDot(200, 200);
-    drawDot(220, 180);
-    drawDot(220, 200);
+    userDrawAbstract();
 }
 
 void display(void){
@@ -37,9 +118,10 @@ void display(void){
 }
 
 void init(){
+    glClearColor(1.0, 1.0, 1.0, 0.0);
     glMatrixMode(GL_PROJECTION);
     glLoadIdentity();
-    gluOrtho2D(-320.0, 320.0, -240.0, 240.0);
+    gluOrtho2D(-1, 1, -1, 1);
 }
 
 int main(int argc, char **argv){
