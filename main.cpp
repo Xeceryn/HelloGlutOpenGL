@@ -1,9 +1,9 @@
 /*
- * GLUT Simple Dot Demo
+ * GLUT Simple Dot Line Demo
  *
  * Written by Adhitya Musthofa December 2019
  *
- * This program is test Dot in GLUT.
+ * This program is test Dot Line in GLUT.
  */
 
 #include <windows.h>
@@ -15,19 +15,29 @@
 
 #include <stdlib.h>
 
-void drawDot(int x, int y){
+void userDrawDotLine(){
+    glClear(GL_COLOR_BUFFER_BIT);
+    glColor3f(1.0, 0.0, 0.0);
+    glPointSize(4);
     glBegin(GL_POINTS);
-    glVertex2i(x, y);
+        glVertex3f(15.0, 15.0, 0.0);
+        glVertex3f(-15.0, 15.0, 0.0);
+        glVertex3f(-15.0, -15.0, 0.0);
+        glVertex3f(15.0, -15.0, 0.0);
     glEnd();
+
+    glColor3f(0.5, 0.5, 0.5);
+    glBegin(GL_LINES);
+        glVertex3f(25, 25, 0.0);
+        glVertex3f(175.0, 175.0, 0.0);
+    glEnd();
+
+    glFlush();
 }
 
 void userDraw(void){
     /* for drawwing here :) */
-    glPointSize(5);
-    glColor3f(1, 0, 0);
-    drawDot(200, 200);
-    drawDot(220, 180);
-    drawDot(220, 200);
+    userDrawDotLine();
 }
 
 void display(void){
@@ -37,18 +47,18 @@ void display(void){
 }
 
 void init(){
+    glClearColor(1.0, 1.0, 1.0, 1.0);
     glMatrixMode(GL_PROJECTION);
     glLoadIdentity();
-    gluOrtho2D(-320.0, 320.0, -240.0, 240.0);
+    gluOrtho2D(-200, 200, -200, 200);
 }
 
 int main(int argc, char **argv){
     glutInit(&argc, argv);
-    glutInitDisplayMode(GLUT_DOUBLE | GLUT_RGB);
-    glutInitWindowPosition(100, 100);
-    glutInitWindowSize(640, 480);
-    glutCreateWindow("Draw Dot");
-    glClearColor(1.0, 1.0, 1.0, 0.0);
+    glutInitDisplayMode(GLUT_SINGLE | GLUT_RGB);
+    glutInitWindowPosition(400,400);
+    glutInitWindowSize(200, 200);
+    glutCreateWindow("Dot Line");
     glutDisplayFunc(display);
     init();
     glutMainLoop();
