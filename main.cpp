@@ -1,9 +1,9 @@
 /*
- * GLUT drawStarRed Dot Demo
+ * GLUT drawLingkaran Dot Demo
  *
  * Written by Adhitya Musthofa December 2019
  *
- * This program is test drawStarRed in GLUT.
+ * This program is test drawLingkaran in GLUT.
  */
 
 #include <windows.h>
@@ -14,31 +14,38 @@
 #endif
 
 #include <stdlib.h>
+#include <math.h>
 
 typedef struct {float x; float y;} Point2D_t;
 typedef struct {int x; int y;} Point2D_i;
 
-void createStar(Point2D_t *bintang, int n){
-    glColor3f(1.0, 0.0, 0.0);
-    glBegin(GL_LINE_LOOP);
-        for(int i=0; i<n; i++){
-            glVertex3f(bintang[i].x, bintang[i].y, 0);
-        }
+void createLingkaran(Point2D_t *p, int n){
+    glColor3f(0.0, 0.0, 0.0);
+    glBegin(GL_LINE_STRIP);
+    for(int i=0; i<360; i++){
+        glVertex3f(p[i].x, p[i].y, 0.0);
+    }
     glEnd();
 }
 
-void drawStar(){
-    glClear(GL_COLOR_BUFFER_BIT);
-    Point2D_t bintang[10]={{70, 136}, {89, 80}, {147, 80}, {100, 45}, {118, -9}, {70, 24}, {22, -9}, {44, 45}, {-7, 80}, {53, 80}};
-
-    createStar(bintang, 10);
+void drawLingkaran(){
+    Point2D_t p[360];
+    float jari=100.0;
+    float jari1=75.0;
+    glClearColor(1.0, 1.0, 1.0, 0.0);
+    for(int i=0; i<360; i++){
+        double teta=(float)(i/57.3);
+        p[i].x=(float)(jari*cos(teta));
+        p[i].y=(float)(jari*sin(teta));
+    }
+    createLingkaran(p, 360);
 
     glFlush();
 }
 
 void userDraw(void){
     /* for drawwing here :) */
-    drawStar();
+    drawLingkaran();
 }
 
 void display(void){
@@ -50,16 +57,15 @@ void display(void){
 void init(){
     glMatrixMode(GL_PROJECTION);
     glLoadIdentity();
-    gluOrtho2D(-200.0, 200.0, -200.0, 200.0);
+    gluOrtho2D(-200, 200, -200, 200);
 }
 
 int main(int argc, char **argv){
     glutInit(&argc, argv);
     glutInitDisplayMode(GLUT_SINGLE | GLUT_RGB);
-    glutInitWindowPosition(400, 400);
-    glutInitWindowSize(200, 200);
-    glutCreateWindow("Draw Star");
-    glClearColor(1.0, 1.0, 1.0, 0.0);
+    glutInitWindowPosition(100, 100);
+    glutInitWindowSize(400, 400);
+    glutCreateWindow("Draw Lingkaran");
     glutDisplayFunc(display);
     init();
     glutMainLoop();
