@@ -1,9 +1,9 @@
 /*
- * GLUT Simple Dot Demo
+ * GLUT drawStarRed Dot Demo
  *
  * Written by Adhitya Musthofa December 2019
  *
- * This program is test Dot in GLUT.
+ * This program is test drawStarRed in GLUT.
  */
 
 #include <windows.h>
@@ -15,19 +15,30 @@
 
 #include <stdlib.h>
 
-void drawDot(int x, int y){
-    glBegin(GL_POINTS);
-    glVertex2i(x, y);
+typedef struct {float x; float y;} Point2D_t;
+typedef struct {int x; int y;} Point2D_i;
+
+void createStar(Point2D_t *bintang, int n){
+    glColor3f(1.0, 0.0, 0.0);
+    glBegin(GL_LINE_LOOP);
+        for(int i=0; i<n; i++){
+            glVertex3f(bintang[i].x, bintang[i].y, 0);
+        }
     glEnd();
+}
+
+void drawStar(){
+    glClear(GL_COLOR_BUFFER_BIT);
+    Point2D_t bintang[10]={{70, 136}, {89, 80}, {147, 80}, {100, 45}, {118, -9}, {70, 24}, {22, -9}, {44, 45}, {-7, 80}, {53, 80}};
+
+    createStar(bintang, 10);
+
+    glFlush();
 }
 
 void userDraw(void){
     /* for drawwing here :) */
-    glPointSize(5);
-    glColor3f(1, 0, 0);
-    drawDot(200, 200);
-    drawDot(220, 180);
-    drawDot(220, 200);
+    drawStar();
 }
 
 void display(void){
@@ -39,15 +50,15 @@ void display(void){
 void init(){
     glMatrixMode(GL_PROJECTION);
     glLoadIdentity();
-    gluOrtho2D(-320.0, 320.0, -240.0, 240.0);
+    gluOrtho2D(-200.0, 200.0, -200.0, 200.0);
 }
 
 int main(int argc, char **argv){
     glutInit(&argc, argv);
-    glutInitDisplayMode(GLUT_DOUBLE | GLUT_RGB);
-    glutInitWindowPosition(100, 100);
-    glutInitWindowSize(640, 480);
-    glutCreateWindow("Draw Dot");
+    glutInitDisplayMode(GLUT_SINGLE | GLUT_RGB);
+    glutInitWindowPosition(400, 400);
+    glutInitWindowSize(200, 200);
+    glutCreateWindow("Draw Star");
     glClearColor(1.0, 1.0, 1.0, 0.0);
     glutDisplayFunc(display);
     init();
