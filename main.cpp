@@ -1,9 +1,9 @@
 /*
- * GLUT Simple Dot Demo
+ * GLUT Star 2D Demo
  *
  * Written by Adhitya Musthofa December 2019
  *
- * This program is test Dot in GLUT.
+ * This program is test Star 2D in GLUT.
  */
 
 #include <windows.h>
@@ -15,19 +15,27 @@
 
 #include <stdlib.h>
 
-void drawDot(int x, int y){
-    glBegin(GL_POINTS);
-    glVertex2i(x, y);
+void userDrawStar(){
+    glColor3f(0,0,0);
+    glLineWidth(3);
+    glBegin(GL_LINE_LOOP);
+    glVertex2f(-1.40, -1.60);
+    glVertex2f(-0.90, -0.15);
+    glVertex2f(-2.0, 0.75);
+    glVertex2f(-0.5, 0.75);
+    glVertex2f(0.0, 2.0);
+    glVertex2f(0.5, 0.75);
+    glVertex2f(2.0, 0.75);
+    glVertex2f(0.90, -0.15);
+    glVertex2f(1.40, -1.60);
+    glVertex2f(0.0, -0.75);
     glEnd();
+    glFlush();
 }
 
 void userDraw(void){
     /* for drawwing here :) */
-    glPointSize(5);
-    glColor3f(1, 0, 0);
-    drawDot(200, 200);
-    drawDot(220, 180);
-    drawDot(220, 200);
+    userDrawStar();
 }
 
 void display(void){
@@ -39,7 +47,7 @@ void display(void){
 void init(){
     glMatrixMode(GL_PROJECTION);
     glLoadIdentity();
-    gluOrtho2D(-320.0, 320.0, -240.0, 240.0);
+    gluOrtho2D(-10.0, 10.0, -10.0, 10.0);
 }
 
 int main(int argc, char **argv){
@@ -53,5 +61,3 @@ int main(int argc, char **argv){
     init();
     glutMainLoop();
 }
-
-
