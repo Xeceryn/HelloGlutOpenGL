@@ -1,9 +1,9 @@
 /*
- * GLUT drawStarRed Dot Demo
+ * GLUT drawGrafikSinus Dot Demo
  *
  * Written by Adhitya Musthofa December 2019
  *
- * This program is test drawStarRed in GLUT.
+ * This program is test drawGrafikSinus in GLUT.
  */
 
 #include <windows.h>
@@ -14,31 +14,28 @@
 #endif
 
 #include <stdlib.h>
+#include <math.h>
 
-typedef struct {float x; float y;} Point2D_t;
-typedef struct {int x; int y;} Point2D_i;
-
-void createStar(Point2D_t *bintang, int n){
-    glColor3f(1.0, 0.0, 0.0);
-    glBegin(GL_LINE_LOOP);
-        for(int i=0; i<n; i++){
-            glVertex3f(bintang[i].x, bintang[i].y, 0);
-        }
+void drawGrafikSinus(){
+    double i;
+    glColor3f(0, 0, 1.0);
+    glBegin(GL_LINES);
+        glVertex2f(0, 10);
+        glVertex2f(0, -1);
+        glVertex2f(6.283, 0);
+        glVertex2f(-0.15, 0);
     glEnd();
-}
-
-void drawStar(){
-    glClear(GL_COLOR_BUFFER_BIT);
-    Point2D_t bintang[10]={{70, 136}, {89, 80}, {147, 80}, {100, 45}, {118, -9}, {70, 24}, {22, -9}, {44, 45}, {-7, 80}, {53, 80}};
-
-    createStar(bintang, 10);
-
+    glColor3f(0, 1.0, 0);
+    glBegin(GL_LINE_STRIP);
+    for(i=0; i<6.3; i+=0.1)
+        glVertex2f(i, cos(i));
+    glEnd();
     glFlush();
 }
 
 void userDraw(void){
     /* for drawwing here :) */
-    drawStar();
+    drawGrafikSinus();
 }
 
 void display(void){
@@ -48,21 +45,17 @@ void display(void){
 }
 
 void init(){
-    glMatrixMode(GL_PROJECTION);
-    glLoadIdentity();
-    gluOrtho2D(-200.0, 200.0, -200.0, 200.0);
+    gluOrtho2D(-1, 7, -1.25, 1.25);
 }
 
 int main(int argc, char **argv){
     glutInit(&argc, argv);
     glutInitDisplayMode(GLUT_SINGLE | GLUT_RGB);
-    glutInitWindowPosition(400, 400);
-    glutInitWindowSize(200, 200);
-    glutCreateWindow("Draw Star");
+    glutInitWindowPosition(300, 200);
+    glutInitWindowSize(400, 400);
+    glutCreateWindow("Draw Grafik Sinus");
     glClearColor(1.0, 1.0, 1.0, 0.0);
     glutDisplayFunc(display);
     init();
     glutMainLoop();
 }
-
-

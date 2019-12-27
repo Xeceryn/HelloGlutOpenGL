@@ -1,9 +1,10 @@
 # depslib dependency file v1.0
-1577106949 source:c:\users\tos\documents\grafika\opengltest\main.cpp
+1577449316 source:c:\users\tos\documents\grafika\opengltest\main.cpp
 	<windows.h>
 	<GLUT/glut.h>
 	<GL/glut.h>
 	<stdlib.h>
+	<math.h>
 
 1301111162 c:\program files (x86)\codeblocks\mingw\include\windows.h
 	<winresrc.h>
@@ -219,4 +220,7 @@
 1301111164 c:\program files (x86)\codeblocks\mingw\include\gl\glu.h
 	<stddef.h>
 	<GL/gl.h>
+
+1341006774 c:\program files (x86)\codeblocks\mingw\include\math.h
+	<_mingw.h>
 
