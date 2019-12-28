@@ -20,159 +20,220 @@
 #endif
 
 #include <stdlib.h>
+#include <math.h>
 
-static int slices = 16;
-static int stacks = 16;
+typedef struct {float x; float y;} Point2D_t;
+typedef struct {int x; int y;} Point2D_i;
+typedef struct {float x, y, z;} Point3D_t;
+typedef struct {float v[3];} Vector3D_t;
+typedef struct {float m[3][3];} matrix3D_t;
+typedef struct {int m[3][3];} matrix3D_i;
+typedef struct {float r; float g; float b;} color_t;
+typedef struct {
+    int numofVertices;
+    long int pnt[32];
+} face_t;
+typedef struct {
+    int numofVertices;
+    Point2D_t pnt[100];
+    int numofFaces;
+    face_t fc[32];
+} object3D_t;
 
-/* GLUT callback Handlers */
+matrix3D_t createIdentity(){
+    matrix3D_t rotate;
+    rotate.m[0][0]=0.0;
+    rotate.m[0][1]=0.0;
+    rotate.m[0][2]=0.0;
 
-static void resize(int width, int height)
-{
-    const float ar = (float) width / (float) height;
+    rotate.m[1][0]=0.0;
+    rotate.m[1][1]=0.0;
+    rotate.m[1][2]=0.0;
 
-    glViewport(0, 0, width, height);
-    glMatrixMode(GL_PROJECTION);
-    glLoadIdentity();
-    glFrustum(-ar, ar, -1.0, 1.0, 2.0, 100.0);
-
-    glMatrixMode(GL_MODELVIEW);
-    glLoadIdentity() ;
+    rotate.m[2][0]=0.0;
+    rotate.m[2][1]=0.0;
+    rotate.m[2][1]=0.0;
+    return rotate;
 }
 
-static void display(void)
-{
-    const double t = glutGet(GLUT_ELAPSED_TIME) / 1000.0;
-    const double a = t*90.0;
+matrix3D_t rotationX(float teta){
+    matrix3D_t rotate = createIdentity();
+    rotate.m[0][0]=1.0;
+    rotate.m[0][1]=0.0;
+    rotate.m[0][2]=0.0;
 
-    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-    glColor3d(1,0,0);
+    rotate.m[1][0]=0.0;
+    rotate.m[1][1]=cos(teta/57.3);
+    rotate.m[1][2]=-sin(teta/57.3);
 
-    glPushMatrix();
-        glTranslated(-2.4,1.2,-6);
-        glRotated(60,1,0,0);
-        glRotated(a,0,0,1);
-        glutSolidSphere(1,slices,stacks);
-    glPopMatrix();
+    rotate.m[2][0]=0.0;
+    rotate.m[2][1]=sin(teta/57.3);
+    rotate.m[2][1]=cos(teta/57.3);
+    return rotate;
+}
 
-    glPushMatrix();
-        glTranslated(0,1.2,-6);
-        glRotated(60,1,0,0);
-        glRotated(a,0,0,1);
-        glutSolidCone(1,1,slices,stacks);
-    glPopMatrix();
+matrix3D_t rotationY(float teta){
+    matrix3D_t rotate = createIdentity();
+    rotate.m[0][0]=cos(teta/57.3);
+    rotate.m[0][1]=0.0;
+    rotate.m[0][2]=-sin(teta/57.3);
 
-    glPushMatrix();
-        glTranslated(2.4,1.2,-6);
-        glRotated(60,1,0,0);
-        glRotated(a,0,0,1);
-        glutSolidTorus(0.2,0.8,slices,stacks);
-    glPopMatrix();
+    rotate.m[1][0]=0.0;
+    rotate.m[1][1]=1.0;
+    rotate.m[1][2]=0.0;
 
-    glPushMatrix();
-        glTranslated(-2.4,-1.2,-6);
-        glRotated(60,1,0,0);
-        glRotated(a,0,0,1);
-        glutWireSphere(1,slices,stacks);
-    glPopMatrix();
+    rotate.m[2][0]=-sin(teta/57.3);
+    rotate.m[2][1]=0.0;
+    rotate.m[2][1]=cos(teta/57.3);
+    return rotate;
+}
 
-    glPushMatrix();
-        glTranslated(0,-1.2,-6);
-        glRotated(60,1,0,0);
-        glRotated(a,0,0,1);
-        glutWireCone(1,1,slices,stacks);
-    glPopMatrix();
+matrix3D_t rotationZ(float teta){
+    matrix3D_t rotate = createIdentity();
+    rotate.m[0][0]=cos(teta/57.3);
+    rotate.m[0][1]=-sin(teta/57.3);
+    rotate.m[0][2]=0.0;
 
-    glPushMatrix();
-        glTranslated(2.4,-1.2,-6);
-        glRotated(60,1,0,0);
-        glRotated(a,0,0,1);
-        glutWireTorus(0.2,0.8,slices,stacks);
-    glPopMatrix();
+    rotate.m[1][0]=sin(teta/57.3);
+    rotate.m[1][1]=cos(teta/57.3);
+    rotate.m[1][2]=0.0;
 
+    rotate.m[2][0]=0.0;
+    rotate.m[2][1]=0.0;
+    rotate.m[2][1]=1.0;
+    return rotate;
+}
+
+Vector3D_t operator +(Vector3D_t a, Vector3D_t b){
+    Vector3D_t c;
+    for(int i=0; i<3; i++){
+        c.v[i]=a.v[i]+b.v[i];
+    }
+    return c;
+}
+
+Vector3D_t operator -(Vector3D_t a, Vector3D_t b){
+    Vector3D_t c;
+    for(int i=0; i<3; i++){
+        c.v[i]=a.v[i]-b.v[i];
+    }
+    return c;
+}
+
+Vector3D_t operator *(matrix3D_t a, Vector3D_t b){
+    Vector3D_t c;
+    for(int i=0; i<3; i++){
+        c.v[i]=0;
+        for(int j=0; j<3; j++){
+            c.v[i]+=a.m[i][j]*b.v[j];
+        }
+    }
+    return c;
+}
+
+void createKubus(Vector3D_t kubus[], int n){
+    float z1=0.0;
+    float z2=0.0;
+
+    glColor3f(1.0, 0.0, 0.0);
+    glBegin(GL_LINES);
+        glVertex3f(-210.0, 0.0, 0.0);
+        glVertex3f(210.0, 0.0, 0.0);
+        glVertex3f(0.0, -210.0, 0.0);
+        glVertex3f(0.0, 210.0, 0.0);
+    glEnd();
+
+    glColor3f(0.0, 1.0, 0.0);
+    glBegin(GL_LINES);
+        glVertex3f(kubus[0].v[0], kubus[0].v[1], z1);
+        glVertex3f(kubus[1].v[0], kubus[1].v[1], z2);
+        glVertex3f(kubus[1].v[0], kubus[1].v[1], z1);
+        glVertex3f(kubus[2].v[0], kubus[2].v[1], z2);
+        glVertex3f(kubus[2].v[0], kubus[2].v[1], z1);
+        glVertex3f(kubus[3].v[0], kubus[3].v[1], z2);
+        glVertex3f(kubus[3].v[0], kubus[3].v[1], z1);
+        glVertex3f(kubus[0].v[0], kubus[0].v[1], z2);
+        glVertex3f(kubus[4].v[0], kubus[4].v[1], z1);
+        glVertex3f(kubus[5].v[0], kubus[5].v[1], z2);
+        glVertex3f(kubus[5].v[0], kubus[5].v[1], z1);
+        glVertex3f(kubus[6].v[0], kubus[6].v[1], z2);
+        glVertex3f(kubus[6].v[0], kubus[6].v[1], z1);
+        glVertex3f(kubus[7].v[0], kubus[7].v[1], z2);
+        glVertex3f(kubus[7].v[0], kubus[7].v[1], z1);
+        glVertex3f(kubus[4].v[0], kubus[4].v[1], z2);
+        glVertex3f(kubus[0].v[0], kubus[0].v[1], z1);
+        glVertex3f(kubus[4].v[0], kubus[4].v[1], z2);
+        glVertex3f(kubus[1].v[0], kubus[1].v[1], z1);
+        glVertex3f(kubus[5].v[0], kubus[5].v[1], z2);
+        glVertex3f(kubus[2].v[0], kubus[2].v[1], z1);
+        glVertex3f(kubus[6].v[0], kubus[6].v[1], z2);
+        glVertex3f(kubus[3].v[0], kubus[3].v[1], z1);
+        glVertex3f(kubus[7].v[0], kubus[7].v[1], z2);
+    glEnd();
+}
+
+void userDrawKubus(){
+    int n=8;
+    float sudut=0.0;
+    Vector3D_t kubus[8]={
+        {-50.0, 50.0, 50.0},
+        {50.0, 50.0, 55.0},
+        {50.0, -50.0, 50.0},
+        {-50.0, -50.0, 50.0},
+        {-25.0, 25.0, -50.0},
+        {25.0, 25.0, -50.0},
+        {25.0, -25.0, -50.0},
+        {-25.0, -25.0, -50.0}
+    };
+    /*TODO: create rotate*/
+
+    matrix3D_t matrix_X=rotationX(sudut);
+    matrix3D_t matrix_Y=rotationY(sudut);
+    matrix3D_t matrix_Z=rotationZ(sudut);
+
+    for(int i=0; i<n; i++){
+        kubus[i]=operator *(matrix_X, kubus[i]);
+        kubus[i]=operator *(matrix_Y, kubus[i]);
+        kubus[i]=operator *(matrix_Z, kubus[i]);
+    }
+
+    createKubus(kubus, 8);
+    sudut++; if(sudut>=360) sudut=0.0;
+    glFlush();
+}
+
+void userDraw(){
+    /* user draw here */
+    userDrawKubus();
+}
+
+void display(){
+    glClear(GL_COLOR_BUFFER_BIT);
+    userDraw();
     glutSwapBuffers();
 }
 
-
-static void key(unsigned char key, int x, int y)
-{
-    switch (key)
-    {
-        case 27 :
-        case 'q':
-            exit(0);
-            break;
-
-        case '+':
-            slices++;
-            stacks++;
-            break;
-
-        case '-':
-            if (slices>3 && stacks>3)
-            {
-                slices--;
-                stacks--;
-            }
-            break;
-    }
-
+void timer(int value){
     glutPostRedisplay();
+    glutTimerFunc(10, timer, 0);
 }
 
-static void idle(void)
-{
-    glutPostRedisplay();
+void init(){
+    glClearColor(1.0, 1.0, 1.0, 0.0);
+    glMatrixMode(GL_PROJECTION);
+    glLoadIdentity();
+    gluOrtho2D(-200, 200, -200, 200);
 }
 
-const GLfloat light_ambient[]  = { 0.0f, 0.0f, 0.0f, 1.0f };
-const GLfloat light_diffuse[]  = { 1.0f, 1.0f, 1.0f, 1.0f };
-const GLfloat light_specular[] = { 1.0f, 1.0f, 1.0f, 1.0f };
-const GLfloat light_position[] = { 2.0f, 5.0f, 5.0f, 0.0f };
-
-const GLfloat mat_ambient[]    = { 0.7f, 0.7f, 0.7f, 1.0f };
-const GLfloat mat_diffuse[]    = { 0.8f, 0.8f, 0.8f, 1.0f };
-const GLfloat mat_specular[]   = { 1.0f, 1.0f, 1.0f, 1.0f };
-const GLfloat high_shininess[] = { 100.0f };
-
-/* Program entry point */
-
-int main(int argc, char *argv[])
-{
+int main(int argc, char *argv[]){
     glutInit(&argc, argv);
-    glutInitWindowSize(640,480);
-    glutInitWindowPosition(10,10);
-    glutInitDisplayMode(GLUT_RGB | GLUT_DOUBLE | GLUT_DEPTH);
-
-    glutCreateWindow("GLUT Shapes");
-
-    glutReshapeFunc(resize);
+    glutInitDisplayMode(GLUT_SINGLE | GLUT_RGB);
+    glutInitWindowSize(400, 400);
+    glutInitWindowPosition(200, 200);
+    glutCreateWindow("Create Box");
+    init();
     glutDisplayFunc(display);
-    glutKeyboardFunc(key);
-    glutIdleFunc(idle);
-
-    glClearColor(1,1,1,1);
-    glEnable(GL_CULL_FACE);
-    glCullFace(GL_BACK);
-
-    glEnable(GL_DEPTH_TEST);
-    glDepthFunc(GL_LESS);
-
-    glEnable(GL_LIGHT0);
-    glEnable(GL_NORMALIZE);
-    glEnable(GL_COLOR_MATERIAL);
-    glEnable(GL_LIGHTING);
-
-    glLightfv(GL_LIGHT0, GL_AMBIENT,  light_ambient);
-    glLightfv(GL_LIGHT0, GL_DIFFUSE,  light_diffuse);
-    glLightfv(GL_LIGHT0, GL_SPECULAR, light_specular);
-    glLightfv(GL_LIGHT0, GL_POSITION, light_position);
-
-    glMaterialfv(GL_FRONT, GL_AMBIENT,   mat_ambient);
-    glMaterialfv(GL_FRONT, GL_DIFFUSE,   mat_diffuse);
-    glMaterialfv(GL_FRONT, GL_SPECULAR,  mat_specular);
-    glMaterialfv(GL_FRONT, GL_SHININESS, high_shininess);
-
+    glutTimerFunc(1, timer, 0);
     glutMainLoop();
-
-    return EXIT_SUCCESS;
+    return 0;
 }
