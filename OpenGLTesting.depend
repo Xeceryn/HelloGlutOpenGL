@@ -1,9 +1,17 @@
 # depslib dependency file v1.0
+<<<<<<< HEAD
 1577106949 source:c:\users\tos\documents\grafika\opengltest\main.cpp
+=======
+1577556851 source:c:\users\tos\documents\grafika\opengltest\main.cpp
+>>>>>>> kubus3D
 	<windows.h>
 	<GLUT/glut.h>
 	<GL/glut.h>
 	<stdlib.h>
+<<<<<<< HEAD
+=======
+	<math.h>
+>>>>>>> kubus3D
 
 1301111162 c:\program files (x86)\codeblocks\mingw\include\windows.h
 	<winresrc.h>
@@ -220,3 +228,9 @@
 	<stddef.h>
 	<GL/gl.h>
 
+<<<<<<< HEAD
+=======
+1341006774 c:\program files (x86)\codeblocks\mingw\include\math.h
+	<_mingw.h>
+
+>>>>>>> kubus3D
